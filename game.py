@@ -41,6 +41,12 @@ class Duck(pygame.sprite.Sprite):
         self.killed = False
         self.killed_timer = 0
 
+    def fall_dead(self):
+        if self.killed:
+            # Падение до нижней границы экрана
+            if self.rect.y < SCREEN_HEIGHT - self.rect.height:
+                self.rect.y += 5
+
     def update(self):
         if self.killed:
             # Slowly fall down and disappear after 2 seconds
@@ -107,7 +113,8 @@ def add_ducks():
     duck_counts = {"straight": 2, "abs": 1, "sine": 1}  # Adjust counts as needed
     for movement_type, count in duck_counts.items():
         for _ in range(count):
-            duck_image = random.choice(DUCK_SPRITES)  # Select a random duck image
+            duck_image_index = random.randint(0, 2)
+            duck_image = DUCK_SPRITES[duck_image_index]  # Select a random duck image
             duck = Duck(duck_image, movement_type)  # Pass the image path to Duck constructor
             all_sprites.add(duck)
             ducks.add(duck)
@@ -144,6 +151,7 @@ while True:
                 killed_ducks[hit] = hit.rect.topleft
                 ducks_shot += 1
 
+
     # Update sprites
     ducks.update()
     all_sprites.update()
@@ -154,19 +162,25 @@ while True:
 
     # Draw killed ducks
     for duck, pos in killed_ducks.items():
-        screen.blit(killed_duck_images[duck.image_path], pos)  # Use the image path of the duck
+        screen.blit(killed_duck_images[duck.image_path], pos)
+        if pos[1] < SCREEN_HEIGHT - duck.rect.height:
+            killed_ducks[duck] = (pos[0], pos[1] + 5)  # Use the image path of the duck
 
+    life_x = 10
+    life_y = 10
     # Draw life counter as red squares
     for i in range(lives):
-        life_x = 10 + i * 30
-        life_y = 10
-        pygame.draw.rect(screen, RED, (life_x, life_y, 20, 20))
+        heart_image = pygame.image.load('./game design/heart.png')
+        heart_image=pygame.transform.scale(heart_image,(60, 60))
+        screen.blit(heart_image, (life_x, life_y, 20, 20))
+        life_x += 40
 
     # Draw duck counter as blue squares
-    for i in range(ducks_shot):
-        duck_x = 10 + i * 30
-        duck_y = 50
-        pygame.draw.rect(screen, BLUE, (duck_x, duck_y, 20, 20))
+    duck_x = 10
+    duck_y = 50
+    for duck in killed_ducks:
+        screen.blit(killed_duck_images[duck.image_path], (duck_x, duck_y))
+        duck_x += 40
 
     # Check if all lives are gone
     if lives <= 0:
