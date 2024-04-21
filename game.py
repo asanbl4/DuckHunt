@@ -20,7 +20,7 @@ KILLED_DUCK_IMAGES = {
     './game design/green1.png': './game design/green3.png',
     './game design/purple1.png': './game design/purple3.png'
 }
-background_image = pygame.image.load('game design/bg.png')
+background_image = pygame.image.load('./game design/bg.png')
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 
@@ -46,10 +46,6 @@ class Duck(pygame.sprite.Sprite):
             # Падение до нижней границы экрана
             if self.rect.y < SCREEN_HEIGHT - self.rect.height:
                 self.rect.y += 5
-            else:
-                self.fall_dead()
-
-
 
     def update(self):
         if self.killed:
@@ -58,9 +54,6 @@ class Duck(pygame.sprite.Sprite):
                 self.rect.y += 1
                 self.killed_timer += 1
             else:
-                self.fall_dead()
-
-                all_sprites.remove(self)
                 self.kill()  # Remove the duck sprite from the group
         else:
             self.rect.x += self.speed
@@ -86,14 +79,21 @@ class Duck(pygame.sprite.Sprite):
 class Crosshair(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('game design/mishen.png')
+        self.image = pygame.image.load('./game design/mishen.png')
         self.image = pygame.transform.scale(self.image, (100, 100))
         self.rect = self.image.get_rect()
-
     def update(self):
         self.rect.center = pygame.mouse.get_pos()
 
-
+class Michen(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('./game design/mishen.png')
+        self.image = pygame.transform.scale(self.image, (1, 1))
+        mouse = pygame.mouse.get_pos()
+        self.rect = pygame.Rect(mouse[0], mouse[1], 1, 1)
+    def update(self):
+        self.rect.center = pygame.mouse.get_pos()
 # Terminate function
 def terminate():
     pygame.quit()
@@ -113,8 +113,8 @@ all_sprites = pygame.sprite.Group()
 ducks = pygame.sprite.Group()
 crosshair = Crosshair()
 all_sprites.add(crosshair)
-
-
+michen = Michen()
+all_sprites.add(michen)
 # Add ducks with different movement types
 def add_ducks():
     duck_counts = {"straight": 2, "abs": 1, "sine": 1}  # Adjust counts as needed
@@ -149,26 +149,15 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
-
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # hits = pygame.sprite.spritecollide(crosshair, ducks, True)
-            collision1 = False
-            for duck in ducks:
-                if duck.rect.collidepoint(pygame.mouse.get_pos()):
-                    duck.killed = True
-                    killed_ducks[duck] = duck.rect.topleft
-                    ducks_shot += 1
-                    collision1 = True
-            if collision1 is False:
-                lives -= 1
+            hits = pygame.sprite.spritecollide(michen, ducks, True)
+            if not hits:
+                lives -= 1  # Reduce lives if the shot misses
+            for hit in hits:
+                hit.killed = True
+                killed_ducks[hit] = hit.rect.topleft
+                ducks_shot += 1
 
-            # if not hits:
-            #     lives -= 1  # Reduce lives if the shot misses
-            # for hit in hits:
-            #     if hit.rect.collidepoint(pygame.mouse.get_pos()):
-            #         hit.killed = True
-            #         killed_ducks[hit] = hit.rect.topleft
-            #         ducks_shot += 1
 
     # Update sprites
     ducks.update()
@@ -188,8 +177,8 @@ while True:
     life_y = 10
     # Draw life counter as red squares
     for i in range(lives):
-        heart_image = pygame.image.load('game design/heart.png')
-        heart_image = pygame.transform.scale(heart_image, (60, 60))
+        heart_image = pygame.image.load('./game design/heart.png')
+        heart_image=pygame.transform.scale(heart_image,(60, 60))
         screen.blit(heart_image, (life_x, life_y, 20, 20))
         life_x += 40
 
