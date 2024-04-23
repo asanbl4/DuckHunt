@@ -20,7 +20,10 @@ KILLED_DUCK_IMAGES = {
 }
 background_image = pygame.image.load('./game design/bg.png')
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
+shotgun_sound = pygame.mixer.Sound('./sounds/shotgun.mp3')
+game_over_sound = pygame.mixer.Sound('./sounds/game_over.mp3')
+pygame.mixer.music.load('./sounds/bg_music.mp3')
+pygame.mixer.music.play(loops=-1)
 
 # duck class
 class Duck(pygame.sprite.Sprite):
@@ -163,6 +166,7 @@ while True:
                 hit.killed = True
                 killed_ducks[hit] = hit.rect.topleft
                 ducks_shot += 1
+            shotgun_sound.play()
 
     # update sprites
     ducks.update()
@@ -197,6 +201,7 @@ while True:
     # check if all lives are gone
     if lives <= 0:
         screen.fill(RED)  # Fill the screen with red color
+        game_over_sound.play()
         game_over_text = font.render("Game Over", True, WHITE)
         text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
         screen.blit(game_over_text, text_rect)
