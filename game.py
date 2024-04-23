@@ -201,6 +201,7 @@ while True:
     # check if all lives are gone
     if lives <= 0:
         screen.fill(RED)  # Fill the screen with red color
+        pygame.mixer.music.stop()
         game_over_sound.play()
         game_over_text = font.render("Game Over", True, WHITE)
         text_rect = game_over_text.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
